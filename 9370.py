@@ -27,8 +27,8 @@ for _ in range(t):
     target = []
     for _ in range(m):
         a, b, d = map(int, input().split())
-        graph[a].append([b, d])
-        graph[b].append([a, d])
+        graph[a].append((b, d))
+        graph[b].append((a, d))
     for _ in range(c):
         target.append(int(input()))
     from_start = dijkstra(start)
