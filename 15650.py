@@ -1,4 +1,4 @@
-# 15649번 N과 M (1)
+# 15650번 N과 M (2)
 n, m = map(int, input().split())
 arr = []
 
