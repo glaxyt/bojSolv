@@ -11,4 +11,3 @@ for i in "UCPC":
 
 if check: print("I love UCPC")
 else: print("I hate UCPC")
-        
