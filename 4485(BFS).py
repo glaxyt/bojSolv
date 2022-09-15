@@ -1,4 +1,4 @@
-# 4485번 녹색 옷 입은 애가 젤다지?
+# 4485번 녹색 옷 입은 애가 젤다지? - bfs 풀이
 import sys
 from collections import deque
 
