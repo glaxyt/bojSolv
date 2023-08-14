@@ -1,5 +1,5 @@
 # 14921번 용액 합성하기
-# 투포인터와 완전탐색 사용.
+# 투포인터 사용.
 import sys
 n = int(input())
 liquid = list(map(int, input().split()))
