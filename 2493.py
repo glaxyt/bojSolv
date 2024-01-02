@@ -1,3 +1,5 @@
+# 2493번 탑
+
 n = int(input())
 tower_h = list(map(int, input().split()))
 ans = []
