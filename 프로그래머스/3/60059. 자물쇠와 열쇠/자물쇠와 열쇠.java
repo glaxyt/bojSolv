@@ -1,48 +1,37 @@
 class Solution {
 
     public boolean solution(int[][] key, int[][] lock) {
-        int n = lock.length;
-        int m = key.length;
-        int boardSize = n + 2 * (m - 1);
-        int offset = m - 1;
+        boolean answer = false;
 
-        // 보드 생성
-        int[][] board = new int[boardSize][boardSize];
-        for (int i = 0; i < n; i++) {
-            for (int j = 0; j < n; j++) {
-                board[i + offset][j + offset] = lock[i][j];
-            }
-        }
+        for (int i = 0; i < 4; i++) {
+            key = getRotatedKey(key);
 
-        for (int r = 0; r < 4; r++) {
-            key = getRotatedKey(key); // key 회전
-
-            for (int x = 0; x <= boardSize - m; x++) {
-                for (int y = 0; y <= boardSize - m; y++) {
-                    if (canOpenLock(board, key, x, y, offset, n)) return true;
+            for (int mx = -key.length + 1; mx < lock.length; mx++) {
+                for (int my = -key.length + 1; my < lock.length; my++) {
+                    if (canOpenLock(key, lock, mx, my)) return true;
                 }
             }
         }
 
-        return false;
+        return answer;
     }
 
-    private boolean canOpenLock(int[][] board, int[][] key, int x, int y, int offset, int lockSize) {
-        int[][] copy = deepCopy(board);
-
+    private boolean canOpenLock(int[][] key, int[][] lock, int mx, int my) {
+        int n = lock.length;
         int m = key.length;
 
-        // key를 board에 덮어보기
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < m; j++) {
-                copy[x + i][y + j] += key[i][j];
-            }
-        }
+        for (int x = 0; x < n; x++) {
+            for (int y = 0; y < n; y++) {
+                int keyX = x - mx;
+                int keyY = y - my;
 
-        // lock 영역이 전부 1인지 확인
-        for (int i = 0; i < lockSize; i++) {
-            for (int j = 0; j < lockSize; j++) {
-                if (copy[i + offset][j + offset] != 1) return false;
+                int keyVal = 0;
+                if (0 <= keyX && keyX < m && 0 <= keyY && keyY < m) {
+                    keyVal = key[keyX][keyY];
+                }
+
+                int sum = lock[x][y] + keyVal;
+                if (sum != 1) return false;
             }
         }
 
@@ -56,19 +45,13 @@ class Solution {
         for (int x = 0; x < len; x++) {
             for (int y = 0; y < len; y++) {
                 if (key[x][y] == 1) {
-                    rotatedKey[y][len - x - 1] = 1;
+                    int newX = y;
+                    int newY = len - x - 1;
+                    rotatedKey[newX][newY] = 1;
                 }
             }
         }
 
         return rotatedKey;
-    }
-
-    private int[][] deepCopy(int[][] original) {
-        int[][] copy = new int[original.length][original[0].length];
-        for (int i = 0; i < original.length; i++) {
-            copy[i] = original[i].clone();
-        }
-        return copy;
     }
 }
