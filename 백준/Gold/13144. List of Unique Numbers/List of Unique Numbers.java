@@ -13,16 +13,15 @@ public class Main {
         int right = 0;
         long answer = 0;
 
-        Map<Integer, Integer> map = new HashMap<>();
+        Set<Integer> map = new HashSet<>();
 
         while (right < N) {
 
-            if (map.containsKey(nums[right])) {
-                while (map.containsKey(nums[right])) {
-                    map.remove(nums[left++]);
-                }
+            while (map.contains(nums[right])) {
+                map.remove(nums[left++]);
             }
-            map.put(nums[right++], 1);
+
+            map.add(nums[right++]);
             answer += (right - left);
         }
 
