@@ -8,19 +8,18 @@ public class Main {
         int t = Integer.parseInt(br.readLine());
         while (t-- > 0) {
             int[] nums = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-            Integer[] predators = Arrays.stream(br.readLine().split(" ")).map(Integer::parseInt).toArray(Integer[]::new);
-            Integer[] feed = Arrays.stream(br.readLine().split(" ")).map(Integer::parseInt).toArray(Integer[]::new);
-            Arrays.sort(predators, Collections.reverseOrder());
+            int[] predators = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+            int[] feed = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+            Arrays.sort(predators);
             Arrays.sort(feed);
 
             int result = 0;
             for (int predator : predators) {
                 for (Integer integer : feed) {
-                    if (predator > integer) {
-                        result++;
-                    } else {
+                    if (predator <= integer) {
                         break;
                     }
+                    result++;
                 }
             }
             System.out.println(result);
