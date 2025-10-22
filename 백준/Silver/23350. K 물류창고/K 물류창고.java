@@ -2,93 +2,84 @@ import java.io.BufferedReader;
 import java.io.InputStreamReader;
 import java.util.*;
 
-// 8시 10분 시작.
 public class Main {
-    static PriorityQueue<Container> storage;
+    static int[] parents;
+    static int answer = 0;
     public static void main(String[] args) throws Exception {
         BufferedReader br = new BufferedReader(new InputStreamReader(System.in));
-        // 컨테이너를 적재한다.
-        // 1에 가까울 수록 높은 우선수위이며, M에 가까울수록 낮은 우선순위를 갖는다.
-        // 우선순위가 낮은 순서로 적재한다.
-        // 만일 우선순위가 낮은 컨테이너가 아직 존재한다면 높은 우선순위의 컨테이너는 레일의 처음으로 보낸다.
-        // 우선순위 큐는 오직 메타정보를 저장하는 용도이자 내가 찾는 컨테이너가 무엇인지를 알려주고,
-        // 컨테이너 자체 구현은 큐로 구현한다
-        // 낮은 우선순위의 컨테이너가 오면 무조건 적재한다.
-        // 따라서 추후에 우선순위가 같지만 무게가 더 무겁다면,
-        // 이 과정을, 가벼운 컨테이너가 모두 빠질 때까지 반복한다. 이 과정에서 컨테이너를 뺄 때와 적재될 때 컨테이너의 무게만큼 비용이 발생한다.
+        // 컨테이너를 적재할 때 비용 발생
+
+        // 우선순위가 높을수록 낮은 순서를 가지고 있다. 우선순위가 낮은순서로 적재해야한다.
+        // 우선순위가 올바른 순서로 오지않을 경우, 레일 끝으로 다시 보내며, 이때 컨테이너 무게만큼 비용이 발생한다.
+
+        // 컨테이너의 우선순위가 같을 경우, 무게가 무거운 컨테이너를 아래에 배치해야한다.
+        // 우선순위를 기준으로 적재를하지만, 이때 무게가 더 무거운 컨테이너가 등장한다면, 재배치가 필요하다.
+        // 이때 빼는 컨테이너와 적재하는 컨테이너만큼 비용 발생
         int[] input = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
         int n = input[0];
         int m = input[1];
-
-        List<Integer> priorities = new ArrayList<>();
+        PriorityQueue<Integer> pq = new PriorityQueue<>((a, b) -> Integer.compare(b, a));
         Deque<Container> rail = new ArrayDeque<>();
-        // 레일의 처음으로 보낼 때, 컨테이너의 무게만큼 비용이 발생한다.
-        storage = new PriorityQueue<>((Container a, Container b) -> {
-            int val = Integer.compare(a.priority, b.priority);
-            if (val == 0) return Integer.compare(a.weight, b.weight);
-            return val;
-        });
+        Deque<Container> loadArea = new ArrayDeque<>();
+        Deque<Container> leftSpace = new ArrayDeque<>();
 
         for (int i = 0; i < n; i++) {
-            int[] containerData = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
-            int priority = containerData[0];
-            int weight = containerData[1];
-            priorities.add(priority);
-            rail.offer(new Container(priority, weight));
+            int[] data = Arrays.stream(br.readLine().split(" ")).mapToInt(Integer::parseInt).toArray();
+            int id = data[0];
+            int w = data[1];
+            pq.offer(id);
+            rail.offer(new Container(id, w));
         }
 
-        priorities.sort((a, b) -> Integer.compare(b, a));
+        while (!rail.isEmpty() && !pq.isEmpty()) {
+            int fastestId = pq.poll();
 
-        int answer = 0;
-        for (int idx = 0; idx < priorities.size(); idx++) {
-            int targetPriority = priorities.get(idx);
-
-            while (true) {
-                Container cont = rail.poll();
-                int curContPriority = cont.priority;
-
-                if (curContPriority == targetPriority) {
-                    // 찾았지만 아직 안에 넣어도 되는지 모른다. 무게 비교 필요
-                    if (!storage.isEmpty()) answer += moveLighterContainer(cont);
-                    storage.offer(cont);
-                    answer += cont.weight;
-                    break;
-                }
-                answer += cont.weight;
-                rail.offer(cont);
+            Container cur = rail.pollFirst();
+            while (cur.id != fastestId) {
+                answer += cur.w;
+                rail.offer(cur);
+                cur = rail.pollFirst();
             }
-        }
-        System.out.println(answer);
-    }
 
-    private static int moveLighterContainer(Container container) {
-        int result = 0;
-        int curContainerPriority = container.priority;
-        int curContainerWeight = container.weight;
-        List<Container> tempStorage = new ArrayList<>();
-
-        while (!storage.isEmpty()) {
-            Container topContainer = storage.peek();
-            if (topContainer.priority == curContainerPriority && topContainer.weight < curContainerWeight) {
-                result += topContainer.weight;
-                tempStorage.add(storage.poll());
+            if (loadArea.isEmpty()) {
+                loadArea.offer(cur);
+                answer += cur.w;
             } else {
-                break;
+                Container topContainer = loadArea.peekLast();
+
+                while (topContainer.id == cur.id && topContainer.w < cur.w) {
+                    topContainer = loadArea.pollLast();
+                    leftSpace.offer(topContainer);
+                    answer += topContainer.w;
+                    if (loadArea.isEmpty()) {
+                        break;
+                    }
+                    topContainer = loadArea.peekLast();
+                }
+
+                loadArea.offer(cur);
+                answer += cur.w;
+
+
+                while (!leftSpace.isEmpty()) {
+                    Container c = leftSpace.pollLast();
+                    loadArea.offer(c);
+                    answer += c.w;
+                }
             }
         }
 
-        for (Container cont : tempStorage) storage.offer(cont);
+        System.out.println(answer);
 
-        return result * 2;
     }
 }
 
 class Container {
-    int priority;
-    int weight;
+    int id;
+    int w;
 
-    public Container(int priority, int weight) {
-        this.priority = priority;
-        this.weight = weight;
+    public Container(int id, int w) {
+        this.id = id;
+        this.w = w;
     }
 }
