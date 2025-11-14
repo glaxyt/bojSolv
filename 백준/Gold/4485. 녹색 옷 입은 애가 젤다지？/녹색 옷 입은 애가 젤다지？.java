@@ -1,6 +1,9 @@
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
-import java.util.*;
+import java.util.ArrayDeque;
+import java.util.Arrays;
+import java.util.PriorityQueue;
+import java.util.Deque;
 
 public class Main {
     static final int[][] DYxS = {{0,1}, {1,0}, {-1,0}, {0,-1}};
@@ -28,7 +31,9 @@ public class Main {
 
             visited[0][0] = grid[0][0];
 
-            Deque<Pos> dq = new ArrayDeque<>();
+            PriorityQueue<Pos> dq = new PriorityQueue<>((a, b) -> {
+                return a.cost - b.cost;
+            });
             dq.offer(new Pos(0, 0, grid[0][0]));
 
             while (!dq.isEmpty()) {
